@@ -619,25 +619,7 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 	* +------------------------------------------------------------------------------+
 	*/
 
-	/* View Announcements 
-	function announcements() {
-		global $tc_db, $tpl_page;
-		$this->ModeratorsOnly();
-
-		$tpl_page .= '<h1><center>'. _gettext('Announcements') .'</center></h1>'. "\n";
-
-		$entries = Get;
-		0 all of the announcements, ordered with the newest one placed on top 
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
-		foreach($results AS $line) {
-			$entries++;
-			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($line['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' .	'<p>'. stripslashes($line['message']) . '</p>';
-		}
-	}*/
-
+	/* View Announcements */
 	function announcements() {
 		global $tc_db, $tpl_page;
 		$this->ModeratorsOnly();
@@ -649,13 +631,11 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
 		foreach($results AS $line) {
 			$entries++;
-			$threadid = $line['id'];
-			$count = $tc_db->GetAll("SELECT COUNT(post) FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $threadid);
 			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
 			$tpl_page .= stripslashes($line['postedby']);
 			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($line['message']) . '</p><div align="right"><a style="text-align: right;" href="manage_page.php?action=threadview&amp;parentid=' . $threadid . '">Comments [' . $count[0][0] . ']</a></div>';
-			unset($count);
+			$tpl_page .= '</h2>' .
+						'<p>'. stripslashes($line['message']) . '</p>';
 		}
 	}
 
@@ -3550,14 +3530,12 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 					$ban_ips = unserialize($_POST['multiban']);
 				else 
 					$ban_ips = Array($ban_ip);
-				if (isset($_GET['banpost'])) { $banpost = $_GET['banpost']; }
-				if (isset($_GET['banboard'])) { $banboard = $_GET['banboard']; }
 				foreach ($ban_ips as $ban_ip) {
 					$whitelist = $tc_db->GetAll("SELECT `ipmd5` FROM `" . KU_DBPREFIX . "banlist` WHERE `type` = 2");
 					if (in_array(md5($ban_ip), $whitelist)) {
 						exitWithErrorPage(_gettext('That IP is on the whitelist'));
 					}
-					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread, $ban_post_id, $ban_board)) {
+					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread)) {
 						if (((KU_BANMSG != '' || $_POST['banmsg'] != '') && isset($_POST['addbanmsg']) && (isset($_POST['quickbanpostid']) || isset($_POST['quickmultibanpostid']))) || $instantban ) {
 							$ban_msg = ((KU_BANMSG == $_POST['banmsg']) || empty($_POST['banmsg'])) ? KU_BANMSG : $_POST['banmsg'];
 							if (isset($ban_post_id))
@@ -4375,40 +4353,6 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 			die("dnb-".$_GET['boarddir']."-".$_GET['id']."-".(($ip[0]['parentid'] == 0) ? ("y") : ("n"))."=".md5_decrypt($ip[0]['ip'], KU_RANDOMSEED));
 		}
 		die();
-	}
-	function threadview() {
-		$this->ModeratorsOnly();
-		global $tc_db, $tpl_page;
-		$parentid = $_GET['parentid'];
-
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $tc_db->qstr($parentid) . " ORDER BY `postdate` ASC");
-		$announcement = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` WHERE `id` = " . $tc_db->qstr($parentid) );
-
-			$tpl_page .= '<h2>'.stripslashes($announcement[0]['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($announcement[0]['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $announcement[0]['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($announcement[0]['message']) . '</p>';
-
-		if (count($results) > 0) {
-			$tpl_page .= '<dl id="replies">'. "\n";
-			foreach ($results as $result) {
-				$tpl_page .= '<dt style="outline:1px solid;padding:5px;">' . $result['postedby'] . ' at ' . date("n/j/y - g:iA T", $result['postdate']) . '</dt>';
-				$tpl_page .= '<dd style="outline:1px solid;padding:12px;">' . $result['post'] . '</dd><br />';
-			}
-		}
-		$tpl_page .= '</dl>';
-		$tpl_page .= '<form method="post" action="?action=addcomment"><textarea name="comment" cols=100 rows=6></textarea><input type="hidden" name="name" value="' . 
-$_SESSION['manageusername'] . '"><input type="hidden" name="parentid" value="' . $parentid . '"> <input type=submit value="submit"></form>';
-	}
-	function addcomment() {
-		global $tc_db, $tpl_page;
-		$content = $_POST["comment"];
-		$name = $_POST["name"];
-		$parentid = $_POST['parentid'];
-
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "anposts` ( `parentid` , `post` , `postdate` , `postedby` ) VALUES ( " . $tc_db->qstr($parentid) 
-. " , " . $tc_db->qstr($content) . " , '" . time() . "' , " . $tc_db->qstr($name) . " )");
-		$tpl_page .= '<p>Comment post successfull!</p><meta http-equiv="Refresh" content="3; URL=manage_page.php?action=threadview&parentid=' . $parentid . '">';
 	}
 }
 

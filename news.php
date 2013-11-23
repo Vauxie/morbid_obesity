@@ -21,7 +21,7 @@
  * Any news added by an administrator in the manage panel will show here, with
  * the newest entry on the top.
  *
- * @package kusaba
+ * @package kusaba I'm on narcotics. 
  */
 
 // Require the configuration file

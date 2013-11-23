@@ -83,16 +83,13 @@ class Bans {
 		} else {
 			$ban_until = '0';
 		}
-	$whitelist = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."banlist` WHERE (`type` = '2' AND ( `ipmd5` = '" . md5($ip) . "' )) AND (`expired` = 0)" );
-		if ($whitelist) {
-		exitWithErrorPage(_gettext('That IP appears to be on the whitelist'));
-		}
+
 		$boardid = $tc_db->GetOne("SELECT `id` FROM `".KU_DBPREFIX."boards` WHERE `name` = ".$tc_db->qstr($banboard));
 		$post = $tc_db->GetOne("SELECT `parentid` FROM `".KU_DBPREFIX."posts` WHERE `id` = ".$banpost." AND `boardid` = ".$boardid."");
 		if ($post != '0') {
-				$url = KU_WEBPATH . "/" . $banboard . "/res/" . $post . ".html#" . $banpost;
+				$url = "http://www.99chan.org" . "/" . $banboard . "/res/" . $post . ".html#" . $banpost;
 		} else {
-			$url = KU_WEBPATH . "/" . $banboard . "/res/" . $banpost . ".html";
+			$url = "http://www.99chan.org" . "/" . $banboard . "/res/" . $banpost . ".html";
 		}
 
 		$tc_db->Execute("INSERT INTO `".KU_DBPREFIX."banlist` ( `ip` , `ipmd5` , `type` , `allowread` , `globalban` , `boards` , `by` , `at` , `until` , `reason`, `staffnote`, `appealat`, `url` ) VALUES ( ".$tc_db->qstr(md5_encrypt($ip, KU_RANDOMSEED))." , '".md5($ip)."' , '".$type."' , '".$allowread."' , '".$globalban."' , '".$boards."' , '".$modname."' , '".time()."' , ".$tc_db->qstr($ban_until)." , ".$reason." , ".$staffnote.", ".$appealat.", ".$tc_db->qstr($url)." ) ");

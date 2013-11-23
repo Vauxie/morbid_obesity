@@ -487,157 +487,14 @@ $a_img[$x].'" width="50" height="50" alt="" style="border: 1px solid #000; float
 		}
 	}
 
-/*sloth token */
 
-function tokens() {
-		$this->AdministratorsOnly();
-                global $tc_db, $tpl_page;
-		$tpl_page .= '<h2>Tokens</h2>';
-
-		if(isset($_GET['act'])) {
-			if ($_GET['act'] == 'add') {
-				$boards = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."boards` ORDER BY `name`");
-				$tpl_page .= '<form name="token" method="post" enctype="multipart/form-data" action="manage_page.php?action=tokens&act=submit">
-
-						<fieldset>
-						<legend>Token details</legend>
-						<label for="trigger">Trigger:</label><input id="trigger" type="text" name="trigger" /><br />
-						<label for="img">(Optional) Image:</label><input id="img" type="file" name="img" /><br />
-						<label for="html">HTML:</label><textarea name="html" id="html" cols=40 rows=6>{IMG}</textarea><br />
-						<label for="nl2br">Replace Newlines:</label><input type="checkbox" id="nl2br" name="nl2br" "checked"/>
-						<br /></fieldset>
-						<fieldset>
-						<legend>Enable on</legend>
-						<label for="allboards"><strong>All boards</strong></label><input id="allboards" type="checkbox" name="allboards" /><br />
-						<hr><br />';
-				foreach ($boards as $board) {
-						$tpl_page .= '<label for="enableon">' . $board['name'] . '</label><input type="checkbox" value="' . $board['name'] . '" 
-name="enableon[]">';
-				}
-				$tpl_page .= '</fieldset><input type=submit value="submit"></form>';
-			}
-			if ($_GET['act'] == 'submit') {
-					if ($_FILES['img']['size'] > 0) {
-						$path = '/var/www/html/module_images/';
-						$target_path = $path . basename($_FILES['img']['name']);
-						move_uploaded_file($_FILES['img']['tmp_name'], $target_path);
-						$img = '<img src="' . str_replace('/var/www/html/','http://99chan.org/',$target_path) . '" />';
-					}
-					if (isset($_POST['allboards'])) {
-						$boards = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."boards` ORDER BY `name`");
-						foreach ($boards as $board) {
-							$enboards .= $board['name'] . '|';
-							$ab = 1;
-						}
-					} else {
-						foreach ($_POST['enableon'] as $penboard) {
-							$enboards .= $penboard . '|';
-						}
-						$ab = 0;
-					}
-					$html = str_replace('{IMG}',$img,$_POST['html']);
-					if (isset($_POST['nl2br'])) {
-						$html = nl2br($html) . '<br />';
-					}
-					$enboards = substr($enboards, 0, -1);
-
-					if ($_GET['style'] == 'edit') {
-						$tc_db->Execute("UPDATE `" . KU_DBPREFIX . "module` SET `boards` = '" . $enboards . "', `html` = '" . $html . "', `trigger` = '" . 
-$_POST['trigger'] . "', `global` = " . $ab . " WHERE `id`=" . $_GET['id'] . "");
-					} else {
-						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "module` ( `boards` , `html` , `trigger`, `global` ) VALUES ( " . 
-$tc_db->qstr($enboards) . " , " . $tc_db->qstr($html) . " , " . $tc_db->qstr($_POST['trigger']) . " , " . $tc_db->qstr($ab) . " )");
-					}
-
-					$tpl_page .= '<p>Token added successfully!</p><meta http-equiv="Refresh" content="3; URL=manage_page.php?action=tokens&act=view">';
-			}
-			if ($_GET['act'] == 'view') {
-				$tpl_page .= '<table width="100%" border="1">
-						<tbody>
-						<tr>
-						<th>Trigger</th>
-						<th>Boards</th>
-						<th>Token</th>
-						<th>BUTTAN</th>
-						</tr>';
-				$tokens = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."module` ORDER BY `id` DESC");
-				foreach ($tokens as $token) {
-					if ($token['global'] == 1) {
-						$boards = '<strong>All Boards</strong>';
-					} else {
-						$pboards = explode('|', $token['boards']);
-						foreach ($pboards as $board) {
-							$boards .= '/' . $board . '/, ';
-						}
-					}
-					$tpl_page .= '<tr><td>' . $token['trigger'] . '</td><td>' . $boards . '</td><td>' . $token['html'] . '</td><td>[<a 
-href="manage_page.php?action=tokens&act=edit&id=' . $token['id'] . '">EDIT</a>]<br />[<a href="manage_page.php?action=tokens&act=delete&id=' . $token['id'] . 
-'">DELETE</a>]</td></tr>';
-				unset($boards);
-				}
-				$tpl_page .= '</tbody></table>';
-			}
-			if ($_GET['act'] == 'delete') {
-				$tc_db->Execute("DELETE FROM`" . KU_DBPREFIX . "module` WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
-				$tpl_page .= '<p>Token deleted successfully!</p><meta http-equiv="Refresh" content="3; URL=manage_page.php?action=tokens&act=view">';
-			}
-			if ($_GET['act'] == 'edit') {
-				$boards = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."boards` ORDER BY `name`");
-				$token = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."module` WHERE `id` = " . $tc_db->qstr($_GET['id']) . "");
-				$tpl_page .= '<form name="token" method="post" enctype="multipart/form-data" action="manage_page.php?action=tokens&act=submit&style=edit&id=' . 
-$_GET['id'] . '">
-						<fieldset>
-						<legend>Token details</legend>
-						<label for="trigger">Trigger:</label><input id="trigger" type="text" name="trigger" value="' . $token[0]['trigger'] . '" /><br />
-						<label for="img">(Optional) Image:</label><input id="img" type="file" name="img" /><br />
-						<label for="html">HTML:</label><textarea name="html" id="html" cols=40 rows=6>' . $token[0]['html'] . '</textarea><br />
-						<label for="nl2br">Replace Newlines:</label><input type="checkbox" id="nl2br" name="nl2br" "checked"/>
-						<br /></fieldset>
-						<fieldset>
-						<legend>Enable on</legend>
-						<label for="allboards"><strong>All boards</strong></label><input id="allboards" type="checkbox" name="allboards" ' . 
-($token[0]['global'] ? 'checked' : '') . '/><br />
-						<hr><br />';
-
-				$onboards = explode('|', $token[0]['boards']);
-				foreach ($boards as $board) {
-						$tpl_page .= '<label for="enableon">' . $board['name'] . '</label><input type="checkbox" value="' . $board['name'] . '" 
-name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>';
-				}
-				$tpl_page .= '</fieldset><input type=submit value="submit"></form>';
-			}
-		}
-	}
-	function cmp_by_subar($a, $b) {
-		if ($a["$usorta"] == $b["$usorta"]) return 0;
-		if ($a["$usorta"] > $b["$usorta"]) return 1;
-		return -1;
-	}
 	/*
 	* +------------------------------------------------------------------------------+
 	* Home Pages
 	* +------------------------------------------------------------------------------+
 	*/
 
-	/* View Announcements 
-	function announcements() {
-		global $tc_db, $tpl_page;
-		$this->ModeratorsOnly();
-
-		$tpl_page .= '<h1><center>'. _gettext('Announcements') .'</center></h1>'. "\n";
-
-		$entries = Get;
-		0 all of the announcements, ordered with the newest one placed on top 
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
-		foreach($results AS $line) {
-			$entries++;
-			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($line['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' .	'<p>'. stripslashes($line['message']) . '</p>';
-		}
-	}*/
-
+	/* View Announcements */
 	function announcements() {
 		global $tc_db, $tpl_page;
 		$this->ModeratorsOnly();
@@ -649,13 +506,11 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
 		foreach($results AS $line) {
 			$entries++;
-			$threadid = $line['id'];
-			$count = $tc_db->GetAll("SELECT COUNT(post) FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $threadid);
 			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
 			$tpl_page .= stripslashes($line['postedby']);
 			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($line['message']) . '</p><div align="right"><a style="text-align: right;" href="manage_page.php?action=threadview&amp;parentid=' . $threadid . '">Comments [' . $count[0][0] . ']</a></div>';
-			unset($count);
+			$tpl_page .= '</h2>' .
+						'<p>'. stripslashes($line['message']) . '</p>';
 		}
 	}
 
@@ -3550,14 +3405,12 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 					$ban_ips = unserialize($_POST['multiban']);
 				else 
 					$ban_ips = Array($ban_ip);
-				if (isset($_GET['banpost'])) { $banpost = $_GET['banpost']; }
-				if (isset($_GET['banboard'])) { $banboard = $_GET['banboard']; }
 				foreach ($ban_ips as $ban_ip) {
 					$whitelist = $tc_db->GetAll("SELECT `ipmd5` FROM `" . KU_DBPREFIX . "banlist` WHERE `type` = 2");
 					if (in_array(md5($ban_ip), $whitelist)) {
 						exitWithErrorPage(_gettext('That IP is on the whitelist'));
 					}
-					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread, $ban_post_id, $ban_board)) {
+					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread)) {
 						if (((KU_BANMSG != '' || $_POST['banmsg'] != '') && isset($_POST['addbanmsg']) && (isset($_POST['quickbanpostid']) || isset($_POST['quickmultibanpostid']))) || $instantban ) {
 							$ban_msg = ((KU_BANMSG == $_POST['banmsg']) || empty($_POST['banmsg'])) ? KU_BANMSG : $_POST['banmsg'];
 							if (isset($ban_post_id))
@@ -4375,40 +4228,6 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 			die("dnb-".$_GET['boarddir']."-".$_GET['id']."-".(($ip[0]['parentid'] == 0) ? ("y") : ("n"))."=".md5_decrypt($ip[0]['ip'], KU_RANDOMSEED));
 		}
 		die();
-	}
-	function threadview() {
-		$this->ModeratorsOnly();
-		global $tc_db, $tpl_page;
-		$parentid = $_GET['parentid'];
-
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $tc_db->qstr($parentid) . " ORDER BY `postdate` ASC");
-		$announcement = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` WHERE `id` = " . $tc_db->qstr($parentid) );
-
-			$tpl_page .= '<h2>'.stripslashes($announcement[0]['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($announcement[0]['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $announcement[0]['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($announcement[0]['message']) . '</p>';
-
-		if (count($results) > 0) {
-			$tpl_page .= '<dl id="replies">'. "\n";
-			foreach ($results as $result) {
-				$tpl_page .= '<dt style="outline:1px solid;padding:5px;">' . $result['postedby'] . ' at ' . date("n/j/y - g:iA T", $result['postdate']) . '</dt>';
-				$tpl_page .= '<dd style="outline:1px solid;padding:12px;">' . $result['post'] . '</dd><br />';
-			}
-		}
-		$tpl_page .= '</dl>';
-		$tpl_page .= '<form method="post" action="?action=addcomment"><textarea name="comment" cols=100 rows=6></textarea><input type="hidden" name="name" value="' . 
-$_SESSION['manageusername'] . '"><input type="hidden" name="parentid" value="' . $parentid . '"> <input type=submit value="submit"></form>';
-	}
-	function addcomment() {
-		global $tc_db, $tpl_page;
-		$content = $_POST["comment"];
-		$name = $_POST["name"];
-		$parentid = $_POST['parentid'];
-
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "anposts` ( `parentid` , `post` , `postdate` , `postedby` ) VALUES ( " . $tc_db->qstr($parentid) 
-. " , " . $tc_db->qstr($content) . " , '" . time() . "' , " . $tc_db->qstr($name) . " )");
-		$tpl_page .= '<p>Comment post successfull!</p><meta http-equiv="Refresh" content="3; URL=manage_page.php?action=threadview&parentid=' . $parentid . '">';
 	}
 }
 
