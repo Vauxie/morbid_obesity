@@ -88,6 +88,11 @@
 [<a href="/irc/">IRC</a>] 
 [<a href="/phpdenora/">IRC Stats</a>]
 [<a href="/usage/">Site Stats</a>] 
+	{if %KU_MENULINKS neq ''}
+		{foreach key=name item=href from=unserialize(%KU_MENULINKS)}
+			[<a href="{$href}" target="_top">{$name}</a></li>]
+		{/foreach}
+	{/if}
 	</div>
 {/if}
 <br />
