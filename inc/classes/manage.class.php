@@ -22,9 +22,6 @@
  */
 class Manage {
 
-<<<<<<< HEAD
-	/* Show the header of the manage page */
-=======
   /***
     * This function defines who sees the edit post option.
   ***/
@@ -115,9 +112,8 @@ class Manage {
  
 
 	/***
-    *  Show the header of the manage page 
-  ***/
->>>>>>> c6f8350e3ef0f4063fcf1a987bf6d578940ecc5e
+    	  *  Show the header of the manage page 
+  	***/
 	function Header() {
 		global $dwoo_data, $tpl_page;
 
@@ -131,8 +127,8 @@ class Manage {
 	}
 
 	/*** 
-    * Show the footer of the manage page 
-  ***/
+    	  * Show the footer of the manage page 
+  	***/
 	function Footer() {
 		global $dwoo_data, $dwoo, $tpl_page;
 
@@ -144,8 +140,8 @@ class Manage {
 	}
 
 	/***
-    * Creates a salt to be used for passwords
-  ***/
+    	  * Creates a salt to be used for passwords
+  	***/
 	function CreateSalt() {
 		$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		$salt = '';
@@ -157,8 +153,8 @@ class Manage {
 	}
 
 	/***
-    *  Validate the current session 
-  ***/
+    	  *  Validate the current session 
+  	***/
 	function ValidateSession($is_menu = false) {
 		global $tc_db, $tpl_page;
 
@@ -183,8 +179,8 @@ class Manage {
 	}
 
 	/***
-    * Show the login form and halt execution 
-  ***/
+    	  * Show the login form and halt execution 
+  	***/
 	function LoginForm() {
 		global $tc_db, $tpl_page;
 
@@ -194,8 +190,8 @@ class Manage {
 	}
 
 	/***
-    * Check login names and create session if user/pass is correct 
-  ***/
+    	  * Check login names and create session if user/pass is correct 
+  	***/
 	function CheckLogin() {
 		global $tc_db, $action;
 
@@ -267,8 +263,8 @@ class Manage {
 	}
 
 	/***
-    *  Set mod cookies for boards 
-  ***/
+    	  *  Set mod cookies for boards 
+  	***/
 	function SetModerationCookies() {
 		global $tc_db, $tpl_page;
 
@@ -285,8 +281,8 @@ class Manage {
 	}
 
 	/***
-    *  Log current user out 
-  ***/
+    	  *  Log current user out 
+  	***/
 	function Logout() {
 		global $tc_db, $tpl_page;
 
@@ -299,8 +295,8 @@ class Manage {
 	}
 
 	/***
-    *  If the user logged in isn't an admin, kill the script 
-  ***/
+    	  *  If the user logged in isn't an admin, kill the script 
+  	***/
 	function AdministratorsOnly() {
 		global $tc_db, $tpl_page;
 
@@ -310,8 +306,8 @@ class Manage {
 	}
 
 	/***
-    * If the user logged in isn't an moderator or higher, kill the script 
-  ***/
+    	  * If the user logged in isn't an moderator or higher, kill the script 
+  	***/
 	function ModeratorsOnly() {
 		global $tc_db, $tpl_page;
 
@@ -328,8 +324,8 @@ class Manage {
 	}
 
 	/***
-    * See if the user logged in is an admin 
-  ***/
+    	  * See if the user logged in is an admin 
+  	***/
 	function CurrentUserIsAdministrator() {
 		global $tc_db, $tpl_page;
 
@@ -354,8 +350,8 @@ class Manage {
 	}
 
 	/***
-    * See if the user logged in is a moderator 
-  ***/
+    	  * See if the user logged in is a moderator 
+  	***/
 	function CurrentUserIsModerator() {
 		global $tc_db, $tpl_page;
 
@@ -380,8 +376,8 @@ class Manage {
 	}
 
 	/***
-    * See if the user logged in is a moderator of a specified board 
-  ***/
+    	  * See if the user logged in is a moderator of a specified board 
+  	***/
 	function CurrentUserIsModeratorOfBoard($board, $username) {
 		global $tc_db, $tpl_page;
 
