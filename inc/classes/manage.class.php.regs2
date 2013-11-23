@@ -22,102 +22,7 @@
  */
 class Manage {
 
-<<<<<<< HEAD
 	/* Show the header of the manage page */
-=======
-  /***
-    * This function defines who sees the edit post option.
-  ***/
-  function editpostui() {
-      global $tc_db, $tpl_page;
-
-    $this->ModeratorsOnly();
-               
-  }
-       
-  /***
-    * This allows a moderator or adminstrator to edit a post.
-    *
-    * @global $tc_db
-    * @global $tpl_page 
-  ***/
-  function editpost() {
-      global $tc_db, $tpl_page;
-  
-    $this->ModeratorsOnly(); /*OR $this->AdministatorsOnly(); */ /*Select whether you want this option was for modetartors or only administators */
-               
-    $board = isset($_GET['boarddir']) ? $_GET['boarddir'] : '';
-    $editpostid = isset($_GET['editpostid']) ? $_GET['editpostid'] : '';
-    $board_id = $tc_db->GetOne("SELECT HIGH_PRIORITY `id` FROM `". KU_DBPREFIX . "boards` WHERE `name` = ".$tc_db->qstr($board));
-               
-    if($_POST['message'] || $_POST['subject']) {
-
-      if($_POST['message']) {
-      
-        $tc_db->Execute("
-          UPDATE `" . KU_DBPREFIX . "posts` 
-            SET `message` = ".$tc_db->qstr($_POST['message'])." 
-            WHERE `boardid` = ".$board_id." 
-              AND `id` = ".$tc_db->qstr($editpostid)." 
-        ");
-
-      }
-
-      if($_POST['subject']) {
-      
-        $tc_db->Execute("
-          UPDATE `" . KU_DBPREFIX . "posts` 
-            SET `subject` = ".$tc_db->qstr($_POST['subject'])." 
-            WHERE `boardid` = ".$board_id." 
-              AND `id` = ".$tc_db->qstr($editpostid)." 
-        ");
-
-      }              
-
-      $board_class = new Board($board);
-      $board_class->RegenerateThreads(intval($_POST['thread']));
-      $board_class->RegeneratePages();
-      unset($board_class);
-
-      $tpl_page .= _gettext('Edit successful.') . ' <br /><hr />';
-  
-    }
-               
-    $results = $tc_db->GetAll("
-      SELECT HIGH_PRIORITY `parentid`,`message`,`subject` 
-        FROM `" . KU_DBPREFIX . "posts` 
-        WHERE `boardid` = " . $board_id . " 
-          AND `id` = " . $tc_db->qstr($editpostid) . " 
-    ");
-               
-    foreach ($results as $line) {
-
-      $parentid = $line['parentid'];
-      $message = $line['message'];
-      $subject = $line['subject'];
-
-    }
-
-    if($parentid == 0) { $parentid = $editpostid; }
-               
-    $tpl_page .= '<h2>'. _gettext('Edit post ID: '.$editpostid.' from board: /'.$board.'/') . '</h2><br />';
-    $tpl_page .= '
-      <form action="" method="post">
-        Subject:<br /><input type="text" name="subject" value="'.$subject.'" /><br />
-        HTML:<br />
-          <textarea cols="80" rows="15" name="message">'.$message.'</textarea>
-          <input type="hidden" name="thread" value="'.$parentid.'" /><br />
-          <input type="submit" name="edit" value="Edit" />
-      </form>
-    ';
-
-  }
- 
-
-	/***
-    *  Show the header of the manage page 
-  ***/
->>>>>>> c6f8350e3ef0f4063fcf1a987bf6d578940ecc5e
 	function Header() {
 		global $dwoo_data, $tpl_page;
 
@@ -130,9 +35,7 @@ class Manage {
 		$dwoo_data->assign('includeheader', $tpl_includeheader);
 	}
 
-	/*** 
-    * Show the footer of the manage page 
-  ***/
+	/* Show the footer of the manage page */
 	function Footer() {
 		global $dwoo_data, $dwoo, $tpl_page;
 
@@ -143,9 +46,7 @@ class Manage {
 		$dwoo->output(KU_TEMPLATEDIR . '/manage.tpl', $dwoo_data);
 	}
 
-	/***
-    * Creates a salt to be used for passwords
-  ***/
+	// Creates a salt to be used for passwords
 	function CreateSalt() {
 		$chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 		$salt = '';
@@ -156,9 +57,7 @@ class Manage {
 		return $salt;
 	}
 
-	/***
-    *  Validate the current session 
-  ***/
+	/* Validate the current session */
 	function ValidateSession($is_menu = false) {
 		global $tc_db, $tpl_page;
 
@@ -182,9 +81,7 @@ class Manage {
 		}
 	}
 
-	/***
-    * Show the login form and halt execution 
-  ***/
+	/* Show the login form and halt execution */
 	function LoginForm() {
 		global $tc_db, $tpl_page;
 
@@ -193,29 +90,19 @@ class Manage {
 		}
 	}
 
-	/***
-    * Check login names and create session if user/pass is correct 
-  ***/
+	/* Check login names and create session if user/pass is correct */
 	function CheckLogin() {
 		global $tc_db, $action;
 
 		$tc_db->Execute("DELETE FROM `" . KU_DBPREFIX . "loginattempts` WHERE `timestamp` < '" . (time() - 1200) . "'");
 		$results = $tc_db->GetAll("SELECT HIGH_PRIORITY `ip` FROM `" . KU_DBPREFIX . "loginattempts` WHERE `ip` = '" . $_SERVER['REMOTE_ADDR'] . "' LIMIT 6");
-
 		if (count($results) > 5) {
-
- 			exitWithErrorPage(_gettext('System lockout'), _gettext('Sorry, because of your numerous failed logins, you have been locked out from logging in for 20 minutes. Please wait and then try again.'));
-
+			exitWithErrorPage(_gettext('System lockout'), _gettext('Sorry, because of your numerous failed logins, you have been locked out from logging in for 20 minutes. Please wait and then try again.'));
 		} else {
-
 			$results = $tc_db->GetAll("SELECT HIGH_PRIORITY `username`, `password`, `salt` FROM `" . KU_DBPREFIX . "staff` WHERE `username` = " . $tc_db->qstr($_POST['username']) . " AND `type` != 3 LIMIT 1");
-
 			if (count($results) > 0) {
-
 				if (empty($results[0]['salt'])) {
-
 					if (md5($_POST['password']) == $results[0]['password']) {
-
 						$salt = $this->CreateSalt();
 						$tc_db->Execute("UPDATE `" .KU_DBPREFIX. "staff` SET salt = '" .$salt. "' WHERE username = " .$tc_db->qstr($_POST['username']));
 						$newpass = md5($_POST['password'] . $salt);
@@ -227,48 +114,31 @@ class Manage {
 						$action = 'posting_rates';
 						management_addlogentry(_gettext('Logged in'), 1);
 						die('<script type="text/javascript">top.location.href = \''. KU_CGIPATH .'/manage.php\';</script>');
-
 					} else {
-
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "loginattempts` ( `username` , `ip` , `timestamp` ) VALUES ( " . $tc_db->qstr($_POST['username']) . " , '" . $_SERVER['REMOTE_ADDR'] . "' , '" . time() . "' )");
 						exitWithErrorPage(_gettext('Incorrect username/password.'));
-
 					}
-
 				} else {
-
 					if (md5($_POST['password'] . $results[0]['salt']) == $results[0]['password']) {
-
 						$_SESSION['manageusername'] = $_POST['username'];
 						$_SESSION['managepassword'] = md5($_POST['password'] . $results[0]['salt']);
 						$this->SetModerationCookies();
 						$action = 'posting_rates';
 						management_addlogentry(_gettext('Logged in'), 1);
 						die('<script type="text/javascript">top.location.href = \''. KU_CGIPATH .'/manage.php\';</script>');
-
 					} else {
-
 						$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "loginattempts` ( `username` , `ip` , `timestamp` ) VALUES ( " . $tc_db->qstr($_POST['username']) . " , '" . $_SERVER['REMOTE_ADDR'] . "' , '" . time() . "' )");
 						exitWithErrorPage(_gettext('Incorrect username/password.'));
-
 					}
-
 				}
-
 			} else {
-
 				$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "loginattempts` ( `username` , `ip` , `timestamp` ) VALUES ( " . $tc_db->qstr($_POST['username']) . " , '" . $_SERVER['REMOTE_ADDR'] . "' , '" . time() . "' )");
 				exitWithErrorPage(_gettext('Incorrect username/password.'));
-
 			}
-
 		}
-
 	}
 
-	/***
-    *  Set mod cookies for boards 
-  ***/
+	/* Set mod cookies for boards */
 	function SetModerationCookies() {
 		global $tc_db, $tpl_page;
 
@@ -284,9 +154,7 @@ class Manage {
 		}
 	}
 
-	/***
-    *  Log current user out 
-  ***/
+	/* Log current user out */
 	function Logout() {
 		global $tc_db, $tpl_page;
 
@@ -298,9 +166,7 @@ class Manage {
 		die('<script type="text/javascript">top.location.href = \''. KU_CGIPATH .'/manage.php\';</script>');
 	}
 
-	/***
-    *  If the user logged in isn't an admin, kill the script 
-  ***/
+		/* If the user logged in isn't an admin, kill the script */
 	function AdministratorsOnly() {
 		global $tc_db, $tpl_page;
 
@@ -309,9 +175,7 @@ class Manage {
 		}
 	}
 
-	/***
-    * If the user logged in isn't an moderator or higher, kill the script 
-  ***/
+	/* If the user logged in isn't an moderator or higher, kill the script */
 	function ModeratorsOnly() {
 		global $tc_db, $tpl_page;
 
@@ -327,9 +191,7 @@ class Manage {
 		}
 	}
 
-	/***
-    * See if the user logged in is an admin 
-  ***/
+	/* See if the user logged in is an admin */
 	function CurrentUserIsAdministrator() {
 		global $tc_db, $tpl_page;
 
@@ -353,9 +215,7 @@ class Manage {
 		exitWithErrorPage(_gettext('Invalid session, please log in again.'));
 	}
 
-	/***
-    * See if the user logged in is a moderator 
-  ***/
+	/* See if the user logged in is a moderator */
 	function CurrentUserIsModerator() {
 		global $tc_db, $tpl_page;
 
@@ -379,9 +239,7 @@ class Manage {
 		exitWithErrorPage(_gettext('Invalid session, please log in again.'));
 	}
 
-	/***
-    * See if the user logged in is a moderator of a specified board 
-  ***/
+	/* See if the user logged in is a moderator of a specified board */
 	function CurrentUserIsModeratorOfBoard($board, $username) {
 		global $tc_db, $tpl_page;
 
@@ -755,34 +613,13 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 		if ($a["$usorta"] > $b["$usorta"]) return 1;
 		return -1;
 	}
-
-
-
 	/*
 	* +------------------------------------------------------------------------------+
 	* Home Pages
 	* +------------------------------------------------------------------------------+
 	*/
 
-	/* View Announcements 
-	function announcements() {
-		global $tc_db, $tpl_page;
-		$this->ModeratorsOnly();
-
-		$tpl_page .= '<h1><center>'. _gettext('Announcements') .'</center></h1>'. "\n";
-
-		$entries = Get;
-		0 all of the announcements, ordered with the newest one placed on top 
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
-		foreach($results AS $line) {
-			$entries++;
-			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($line['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' .	'<p>'. stripslashes($line['message']) . '</p>';
-		}
-	}*/
-
+	/* View Announcements */
 	function announcements() {
 		global $tc_db, $tpl_page;
 		$this->ModeratorsOnly();
@@ -794,13 +631,11 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` ORDER BY `postedat` DESC");
 		foreach($results AS $line) {
 			$entries++;
-			$threadid = $line['id'];
-			$count = $tc_db->GetAll("SELECT COUNT(post) FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $threadid);
 			$tpl_page .= '<h2>'.stripslashes($line['subject']).' '. _gettext('by') .' ';
 			$tpl_page .= stripslashes($line['postedby']);
 			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $line['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($line['message']) . '</p><div align="right"><a style="text-align: right;" href="manage_page.php?action=threadview&amp;parentid=' . $threadid . '">Comments [' . $count[0][0] . ']</a></div>';
-			unset($count);
+			$tpl_page .= '</h2>' .
+						'<p>'. stripslashes($line['message']) . '</p>';
 		}
 	}
 
@@ -3695,14 +3530,12 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 					$ban_ips = unserialize($_POST['multiban']);
 				else 
 					$ban_ips = Array($ban_ip);
-				if (isset($_GET['banpost'])) { $banpost = $_GET['banpost']; }
-				if (isset($_GET['banboard'])) { $banboard = $_GET['banboard']; }
 				foreach ($ban_ips as $ban_ip) {
 					$whitelist = $tc_db->GetAll("SELECT `ipmd5` FROM `" . KU_DBPREFIX . "banlist` WHERE `type` = 2");
 					if (in_array(md5($ban_ip), $whitelist)) {
 						exitWithErrorPage(_gettext('That IP is on the whitelist'));
 					}
-					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread, $ban_post_id, $ban_board)) {
+					if ($bans_class->BanUser($ban_ip, $_SESSION['manageusername'], $ban_globalban, $ban_duration, $ban_boards, $tc_db->qstr($ban_reason), $tc_db->qstr($ban_note), $tc_db->qstr($ban_appealat), $ban_type, $ban_allowread)) {
 						if (((KU_BANMSG != '' || $_POST['banmsg'] != '') && isset($_POST['addbanmsg']) && (isset($_POST['quickbanpostid']) || isset($_POST['quickmultibanpostid']))) || $instantban ) {
 							$ban_msg = ((KU_BANMSG == $_POST['banmsg']) || empty($_POST['banmsg'])) ? KU_BANMSG : $_POST['banmsg'];
 							if (isset($ban_post_id))
@@ -4520,40 +4353,6 @@ name="enableon[]"' . (in_array($board['name'],$onboards) ? 'checked' : '') . '>'
 			die("dnb-".$_GET['boarddir']."-".$_GET['id']."-".(($ip[0]['parentid'] == 0) ? ("y") : ("n"))."=".md5_decrypt($ip[0]['ip'], KU_RANDOMSEED));
 		}
 		die();
-	}
-	function threadview() {
-		$this->ModeratorsOnly();
-		global $tc_db, $tpl_page;
-		$parentid = $_GET['parentid'];
-
-		$results = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."anposts` WHERE `parentid` = " . $tc_db->qstr($parentid) . " ORDER BY `postdate` ASC");
-		$announcement = $tc_db->GetAll("SELECT * FROM `".KU_DBPREFIX."announcements` WHERE `id` = " . $tc_db->qstr($parentid) );
-
-			$tpl_page .= '<h2>'.stripslashes($announcement[0]['subject']).' '. _gettext('by') .' ';
-			$tpl_page .= stripslashes($announcement[0]['postedby']);
-			$tpl_page .= ' - '.date("n/j/y @ g:iA T", $announcement[0]['postedat']);
-			$tpl_page .= '</h2>' . '<p>'. stripslashes($announcement[0]['message']) . '</p>';
-
-		if (count($results) > 0) {
-			$tpl_page .= '<dl id="replies">'. "\n";
-			foreach ($results as $result) {
-				$tpl_page .= '<dt style="outline:1px solid;padding:5px;">' . $result['postedby'] . ' at ' . date("n/j/y - g:iA T", $result['postdate']) . '</dt>';
-				$tpl_page .= '<dd style="outline:1px solid;padding:12px;">' . $result['post'] . '</dd><br />';
-			}
-		}
-		$tpl_page .= '</dl>';
-		$tpl_page .= '<form method="post" action="?action=addcomment"><textarea name="comment" cols=100 rows=6></textarea><input type="hidden" name="name" value="' . 
-$_SESSION['manageusername'] . '"><input type="hidden" name="parentid" value="' . $parentid . '"> <input type=submit value="submit"></form>';
-	}
-	function addcomment() {
-		global $tc_db, $tpl_page;
-		$content = $_POST["comment"];
-		$name = $_POST["name"];
-		$parentid = $_POST['parentid'];
-
-		$tc_db->Execute("INSERT HIGH_PRIORITY INTO `" . KU_DBPREFIX . "anposts` ( `parentid` , `post` , `postdate` , `postedby` ) VALUES ( " . $tc_db->qstr($parentid) 
-. " , " . $tc_db->qstr($content) . " , '" . time() . "' , " . $tc_db->qstr($name) . " )");
-		$tpl_page .= '<p>Comment post successfull!</p><meta http-equiv="Refresh" content="3; URL=manage_page.php?action=threadview&parentid=' . $parentid . '">';
 	}
 }
 

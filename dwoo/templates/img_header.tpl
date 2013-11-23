@@ -1,5 +1,4 @@
-<script type="text/javascript" src="{$cwebpath}lib/javascript/scriptaculous/lib/prototype.js"></script>
-<script type="text/javascript" src="{$cwebpath}lib/javascript/scriptaculous/src/scriptaculous.js"></script>
+<script type="text/javascript" src="{$cwebpath}lib/javascript/protoaculous-compressed.js"></script>
 <link rel="stylesheet" type="text/css" href="{$cwebpath}css/img_global.css" />
 {loop $ku_styles}
 	<link rel="{if $ neq $__.ku_defaultstyle}alternate {/if}stylesheet" type="text/css" href="{$__.cwebpath}css/{$}.css" title="{$|capitalize}" />
@@ -59,11 +58,18 @@
 {if %KU_WATCHTHREADS}
 	[<a href="#" onclick="javascript:showwatchedthreads();return false" title="{t}Watched Threads{/t}">WT</a>]&nbsp;
 {/if}
+<<<<<<< HEAD
+[<a href="{%KU_WEBPATH}" target="_top">{t}Home{/t}</a>]&nbsp;[<a href="{%KU_CGIPATH}/manage.php" target="_top">{t}Manage{/t}</a>]
+[<a href="/irc/">IRC</a>] 
+[<a href="/phpdenora/">IRC Stats</a>]
+[<a href="/usage/">Site Stats</a>]
+=======
 {if %KU_MENULINKS neq ''}
 	{foreach key=name item=href from=unserialize(%KU_MENULINKS)}
 		[<a href="{$href}" target="_top">{$name}</a></li>]
 	{/foreach}
 {/if}
+>>>>>>> c6f8350e3ef0f4063fcf1a987bf6d578940ecc5e
 </div>
 <div class="navbar">
 {if %KU_GENERATEBOARDLIST}

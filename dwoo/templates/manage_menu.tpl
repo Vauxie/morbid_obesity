@@ -112,7 +112,7 @@ function showdirs() {
 <base target="main" />
 </head>
 <body>
-<img src="{%KU_WEBPATH}/banners/logo" style="width:100%;">
+<img src="/banners/top.php" style="width:100%;">
 <h1>{%KU_NAME}</h1>
 <ul>
 <li><a href="{%KU_WEBFOLDER}" target="_top">{t}Front Page{/t}</a></li>
@@ -120,11 +120,17 @@ function showdirs() {
 {if %KU_MENUSTYLESWITCHER && %KU_MENUTYPE eq 'normal'}
 	<li id="sitestyles"><a onclick="javascript:showstyleswitcher();" href="#" target="_self">[{t}Site Styles{/t}]</a><li>  
 {/if}
+<<<<<<< HEAD
+<li><a href="{%KU_CGIPATH}/manage.php" target="_top">[{t}Management{/t}]  </a></li>
+<li><a href="/irc.html">[{t}Internet Relay Chat{/t}]  </a> </li> 
+<li><a href="/phpdenora/">[{t}IRC Stats{/t}]  </a>   </li>
+=======
 {if %KU_MENULINKS neq '' && %KU_MENUTYPE eq 'normal'}
 	{foreach key=name item=href from=unserialize(%KU_MENULINKS)}
 		<li><a href="{$href}" target="_top">[{$name}]</a></li>
 	{/foreach}
 {/if}
+>>>>>>> c6f8350e3ef0f4063fcf1a987bf6d578940ecc5e
 {if $showdirs eq 0}
 	<li><a onclick="javascript:showdirs();" href="{$files.1}" target="_self">[{t}Show Directories{/t}]</a></li>
 {else}
